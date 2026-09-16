@@ -32,14 +32,35 @@ A infraestrutura caiu em **8 camadas**. Cada camada consertada libera uma **flag
 
 ## 🎯 Como Funciona
 
-1. Faça um **fork** deste repositório para a sua conta do GitHub
-2. Clone o seu fork e conserte **cada fase** (pastas `fase-1-git/` até `fase-8-aws-academy/`)
+1. Crie o **seu repositório** a partir deste modelo:
+   - Clique em **"Use this template"** (recomendado) ou faça um **fork**
+   - Nomeie como **`desafio-apagao-technova-SEU-RA`** e deixe-o **público**
+2. Clone o seu repositório e conserte **cada fase** (pastas `fase-1-git/` até `fase-8-aws-academy/`)
 3. Cada fase tem um `README.md` com o **incidente**, o **objetivo** e o **critério da flag**
-4. A cada push/PR, o **GitHub Actions** (o "juiz automático") valida suas correções
+4. A cada push, o **GitHub Actions** (o "juiz automático") valida suas correções na aba **Actions** do seu repositório
 5. Preencha o **`relatorio-kiro.md`** (obrigatório — sem ele o desafio não conta)
-6. Quando o CI ficar **100% verde** e o relatório estiver completo, você concluiu
+6. Quando o CI do seu repositório ficar **100% verde** e o relatório estiver completo, **registre a entrega** (veja abaixo)
 
-> **Validação automática:** o arquivo `.github/workflows/validar-desafio.yml` roda um job por fase e um **gate final** que só passa quando todas as fases passam. Você acompanha o resultado na aba **Actions** e nos checks do seu PR.
+> **Validação automática (no seu repo):** o arquivo `.github/workflows/validar-desafio.yml` roda um job por fase e um **gate final** que só passa quando todas as fases passam. Acompanhe na aba **Actions**.
+
+---
+
+## 📬 Como Entregar
+
+A entrega segue o mesmo modelo dos Trabalhos de Fixação (TF): o **código fica no seu repositório**, e você **registra a entrega** com um PR no repositório da disciplina.
+
+1. Garanta que o CI do **seu** repositório está **100% verde** e o `relatorio-kiro.md` preenchido
+2. No repositório da disciplina (`unifaat-2026-2-devops`), faça um fork e crie:
+   ```
+   entregas/desafioApagao/SEU-RA/entrega.md
+   ```
+3. No `entrega.md`, inclua a linha **`REPO:`** com a URL do seu repositório (modelo no README da pasta de entregas)
+4. Abra um **Pull Request** para o repositório da disciplina com o título:
+   ```
+   [Desafio Apagão] RA: SEU-RA - Seu Nome
+   ```
+
+> **Correção automática:** ao abrir o PR, o **CI da disciplina clona o seu repositório e roda os 8 verificadores + o relatório automaticamente**. Você vê o resultado nos checks do PR. Se ficar verde até **28/10**, o mascote é seu. 🦖
 
 ---
 
@@ -76,7 +97,7 @@ O prêmio é o **mascote do Kiro** — então usar IA como copiloto **faz parte 
 
 ## 📋 Regras
 
-1. **Individual.** Cada aluno conserta seu próprio fork.
+1. **Individual.** Cada aluno resolve o desafio no seu próprio repositório.
 2. **Todos que completarem ganham** — não é por velocidade.
 3. **IA permitida e obrigatória** (Kiro recomendado; pode combinar com outras LLMs, mas documente).
 4. **É permitido** consultar documentação oficial e o material das aulas.
@@ -89,9 +110,10 @@ O prêmio é o **mascote do Kiro** — então usar IA como copiloto **faz parte 
 ## 🚀 Como Começar
 
 ```bash
-# 1. Faça o fork pela interface do GitHub, depois:
-git clone https://github.com/SEU-USUARIO/desafio-apagao-technova.git
-cd desafio-apagao-technova
+# 1. Crie seu repositório a partir deste modelo ("Use this template" ou fork),
+#    nomeando como desafio-apagao-technova-SEU-RA (público). Depois:
+git clone https://github.com/SEU-USUARIO/desafio-apagao-technova-SEU-RA.git
+cd desafio-apagao-technova-SEU-RA
 
 # 2. Rode a verificação local para ver o estado inicial (tudo quebrado)
 bash scripts/verificar.sh
@@ -106,7 +128,8 @@ git add .
 git commit -m "fix(fase-1): remove segredo vazado do histórico"
 git push
 
-# 6. Abra um PR do seu fork. O CI valida automaticamente.
+# 6. Acompanhe o CI na aba Actions do SEU repositório até ficar 100% verde.
+# 7. Registre a entrega com um PR no repo da disciplina (seção "Como Entregar").
 ```
 
 ---
@@ -115,10 +138,11 @@ git push
 
 Você concluiu o desafio quando:
 
-- [ ] O workflow **validar-desafio** está **verde em todas as 8 fases**
+- [ ] O workflow **validar-desafio** está **verde em todas as 8 fases** no **seu** repositório
 - [ ] O **gate final** (`desafio-completo`) passou
 - [ ] O **`relatorio-kiro.md`** está preenchido e demonstra uso crítico da IA
-- [ ] Seu **PR** está aberto no repositório do desafio
+- [ ] Você abriu o **PR de entrega** em `entregas/desafioApagao/SEU-RA/entrega.md` no repositório da disciplina
+- [ ] O **CI da disciplina** validou seu repositório (checks verdes no PR)
 
 Cumpriu tudo até **28/10**? **O mascote do Kiro é seu.** 🦖
 
