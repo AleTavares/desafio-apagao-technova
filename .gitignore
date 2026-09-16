@@ -20,3 +20,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Gabarito do professor — NUNCA versionar (repo é público)
+GABARITO.md
