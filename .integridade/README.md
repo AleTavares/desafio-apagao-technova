@@ -18,9 +18,11 @@ dele**. Ou seja: mesmo que todas as 8 fases passem, se a integridade falhar, o
 desafio é reprovado.
 
 Para resistir a adulteração, o job **não confia** no script nem no manifesto que
-estão no `HEAD` do aluno. Ele recupera as versões **originais** do **commit-base**
-(primeiro commit do histórico) via `git show <base>:<arquivo>` e roda essa cópia
-limpa contra os arquivos atuais do repositório.
+estão no repositório do aluno. Ele **clona o repositório-modelo oficial** (o upstream
+do professor, definido na variável `UPSTREAM` do workflow) e usa o
+`verificar-integridade.sh` e o `manifest.sha256` **de lá** para checar os arquivos do
+fork do aluno (via `RAIZ_OVERRIDE` apontando para o checkout do aluno). Como o aluno
+não controla o upstream, essa referência é confiável.
 
 ## Uso local (aluno ou professor)
 
@@ -33,14 +35,16 @@ bash .integridade/verificar-integridade.sh
 Como o desafio vive num **fork do aluno**, ele controla todos os arquivos. Esta
 camada torna a adulteração **difícil e detectável**, mas não é uma trava absoluta:
 
-- Se o aluno **reescrever/esmagar (squash) todo o histórico**, o "commit-base" passa
-  a ser dele e ele poderia recompor o manifesto. Isso deixa rastro óbvio (histórico
-  com pouquíssimos commits) e é facilmente flagrado na revisão.
-- **Garantia real e à prova de adulteração** só é possível validando fora do controle
-  do aluno — no **CI da disciplina** (`unifaat-2026-2-devops`), que clona o repo do
-  aluno e roda os verificadores **oficiais** (não os do fork). Recomenda-se que a
-  correção final da disciplina substitua os `verificar.sh` do aluno pelos originais
-  antes de rodar.
+- A checagem depende de o **upstream oficial estar acessível** (repositório público).
+  Se o job não conseguir cloná-lo, ele falha de forma segura (reprova) em vez de passar.
+- A checagem clona o **upstream oficial** definido em `UPSTREAM`. Se você renomear/mover
+  o repositório-modelo, **atualize essa URL** no workflow, senão o job de integridade
+  falha para todos os alunos.
+- **Garantia máxima** é a **correção da entrega** (`validar-entrega.yml` +
+  `scripts/validar-entrega.sh`): ao abrir o PR de entrega neste repositório, o CI
+  clona o fork do aluno e roda os verificadores **oficiais deste repo** (não os do
+  fork). Ou seja, mesmo que o aluno afrouxe algo no fork, a entrega é corrigida com
+  os originais.
 
 ## Ao manter o desafio
 
@@ -63,4 +67,5 @@ for f in \
 done >> .integridade/manifest.sha256
 ```
 
-Depois faça um novo commit para virar o novo "commit-base" de referência.
+Depois faça commit e push no **repositório-modelo oficial** (o upstream), pois é dele
+que o CI de cada aluno baixa a referência.

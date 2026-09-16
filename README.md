@@ -49,20 +49,20 @@ A infraestrutura caiu em **8 camadas**. Cada camada consertada libera uma **flag
 
 ## 📬 Como Entregar
 
-A entrega segue o mesmo modelo dos Trabalhos de Fixação (TF): o **código fica no seu repositório**, e você **registra a entrega** com um PR no repositório da disciplina.
+A entrega segue o mesmo modelo dos Trabalhos de Fixação (TF): o **código fica no seu repositório** (o fork), e você **registra a entrega** com um PR **neste repositório**, apontando para o seu.
 
-1. Garanta que o CI do **seu** repositório está **100% verde** e o `relatorio-kiro.md` preenchido
-2. No repositório da disciplina (`unifaat-2026-2-devops`), faça um fork e crie:
+1. Garanta que o CI do **seu fork** está **100% verde** e o `relatorio-kiro.md` preenchido
+2. Neste repositório, crie o arquivo (use o modelo em [`entregas/_MODELO/entrega.md`](./entregas/_MODELO/entrega.md)):
    ```
-   entregas/desafioApagao/SEU-RA/entrega.md
+   entregas/SEU-RA/entrega.md
    ```
-3. No `entrega.md`, inclua a linha **`REPO:`** com a URL do seu repositório (modelo no README da pasta de entregas)
-4. Abra um **Pull Request** para o repositório da disciplina com o título:
+3. No `entrega.md`, preencha a linha **`REPO:`** com a URL pública do seu fork
+4. Abra um **Pull Request para este repositório** com o título:
    ```
    [Desafio Apagão] RA: SEU-RA - Seu Nome
    ```
 
-> **Correção automática:** ao abrir o PR, o **CI da disciplina clona o seu repositório e roda os 8 verificadores + o relatório automaticamente**. Você vê o resultado nos checks do PR. Se ficar verde até **28/10**, o mascote é seu. 🦖
+> **Correção automática:** ao abrir o PR, o workflow **`validar-entrega`** deste repositório **clona o seu fork e roda os 8 verificadores oficiais + o relatório automaticamente**. Você vê o resultado nos checks do PR. Se ficar verde até **28/10/2026**, o mascote é seu. 🦖
 
 ---
 
@@ -132,7 +132,7 @@ git commit -m "fix(fase-1): remove segredo vazado do histórico"
 git push
 
 # 6. Acompanhe o CI na aba Actions do SEU repositório até ficar 100% verde.
-# 7. Registre a entrega com um PR no repo da disciplina (seção "Como Entregar").
+# 7. Registre a entrega com um PR NESTE repositório (seção "Como Entregar").
 ```
 
 ---
@@ -141,13 +141,13 @@ git push
 
 Você concluiu o desafio quando:
 
-- [ ] O workflow **validar-desafio** está **verde em todas as 8 fases** no **seu** repositório
+- [ ] O workflow **validar-desafio** está **verde em todas as 8 fases** no **seu fork**
 - [ ] O **gate final** (`desafio-completo`) passou
 - [ ] O **`relatorio-kiro.md`** está preenchido e demonstra uso crítico da IA
-- [ ] Você abriu o **PR de entrega** em `entregas/desafioApagao/SEU-RA/entrega.md` no repositório da disciplina
-- [ ] O **CI da disciplina** validou seu repositório (checks verdes no PR)
+- [ ] Você abriu o **PR de entrega** com `entregas/SEU-RA/entrega.md` **neste repositório**
+- [ ] O workflow **`validar-entrega`** validou seu fork (checks verdes no PR)
 
-Cumpriu tudo até **28/10**? **O mascote do Kiro é seu.** 🦖
+Cumpriu tudo até **28/10/2026**? **O mascote do Kiro é seu.** 🦖
 
 ---
 

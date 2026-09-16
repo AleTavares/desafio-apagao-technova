@@ -14,9 +14,10 @@
 
 set -uo pipefail
 
-RAIZ="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-# Quando executado pelo CI da forma robusta, o manifesto ORIGINAL é injetado
-# via MANIFEST_OVERRIDE (recuperado do commit-base). Localmente, usa o do disco.
+# RAIZ = repositório a ser checado. Localmente é a pasta-pai do script.
+# No CI (validação confiável), o verificador OFICIAL é executado com RAIZ_OVERRIDE
+# apontando para o repositório do ALUNO, e MANIFEST_OVERRIDE para o manifesto oficial.
+RAIZ="${RAIZ_OVERRIDE:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 MANIFEST="${MANIFEST_OVERRIDE:-$RAIZ/.integridade/manifest.sha256}"
 
 echo "======================================================"

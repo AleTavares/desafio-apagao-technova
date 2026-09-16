@@ -57,13 +57,15 @@ Cada fase é uma pasta `fase-N-*/` com: um `README.md` (incidente + objetivo + c
 
 ## Fluxo de Entrega (modelo TF)
 
-1. O aluno cria **seu próprio repositório** a partir deste (via "Use this template" ou fork), nomeado `desafio-apagao-technova-SEU-RA`, **público**.
-2. Conserta as 8 fases e preenche o `relatorio-kiro.md`. O CI do repositório dele valida.
-3. Registra a entrega com um **PR no repositório da disciplina** (`unifaat-2026-2-devops`), criando `entregas/desafioApagao/SEU-RA/entrega.md` com uma linha `REPO: <url do repo do aluno>`.
-4. O **CI da disciplina** (workflow `validar-desafio-apagao.yml`) clona o repositório do aluno e roda os verificadores automaticamente.
+1. O aluno faz **fork** deste repositório, nomeado `desafio-apagao-technova-SEU-RA`, **público**.
+2. Conserta as 8 fases e preenche o `relatorio-kiro.md`. O CI do fork dele (`validar-desafio.yml`) valida.
+3. Registra a entrega com um **PR neste próprio repositório** (o modelo), criando `entregas/SEU-RA/entrega.md` com uma linha `REPO: <url do fork do aluno>`.
+4. O workflow **`validar-entrega.yml`** deste repositório dispara no PR: clona o fork do aluno, aplica os verificadores **oficiais** (via `scripts/validar-entrega.sh`) e roda as 8 fases + relatório.
 5. Título do PR: `[Desafio Apagão] RA: XXXXX - Nome`.
 
-> **Nota de arquitetura:** a entrega usa o mesmo mecanismo dos Trabalhos de Fixação — o código fica no repo do aluno; o repo da disciplina recebe só o `entrega.md` e valida remotamente.
+> **Nota de arquitetura:** o código fica no fork do aluno; este repositório recebe só o `entrega.md` e valida remotamente clonando o fork. Como a correção usa os verificadores **deste** repo (não os do fork), o aluno não consegue afrouxar a validação da entrega.
+>
+> ⚠️ **Este desafio é autocontido:** não depende de nenhum outro repositório (ex.: o de conteúdo das aulas). A entrega e a correção acontecem inteiramente aqui.
 
 ---
 

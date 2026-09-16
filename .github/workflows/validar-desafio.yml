@@ -89,39 +89,32 @@ jobs:
   integridade:
     name: 🔒 Integridade da validação
     runs-on: ubuntu-latest
+    # Repositório-modelo do professor (fora do controle do aluno). É a fonte da
+    # verdade dos arquivos de validação. Ajuste se o repo oficial mudar de dono/nome.
+    env:
+      UPSTREAM: "https://github.com/AleTavares/desafio-apagao-technova.git"
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # precisa do histórico completo para pegar o commit-base
       - name: Verificar integridade dos arquivos de validação
         run: |
           set -uo pipefail
           echo "🔒 Checando se os arquivos de validação foram adulterados..."
 
-          # Commit-base = primeiro commit do histórico (versão original do professor).
-          # Não confiamos no script/manifesto que estão no HEAD do aluno: recuperamos
-          # as versões originais via 'git show <base>:<arquivo>'.
-          BASE="$(git rev-list --max-parents=0 HEAD | tail -1)"
-          echo "  commit-base: $BASE"
-
-          SCRIPT_ORIG="$(mktemp)"
-          MANIFEST_ORIG="$(mktemp)"
-
-          if ! git show "$BASE:.integridade/verificar-integridade.sh" > "$SCRIPT_ORIG" 2>/dev/null; then
-            echo "  ❌ Não foi possível recuperar o verificador de integridade original."
-            echo "     O commit-base do desafio parece ter sido removido/reescrito."
-            exit 1
-          fi
-          if ! git show "$BASE:.integridade/manifest.sha256" > "$MANIFEST_ORIG" 2>/dev/null; then
-            echo "  ❌ Não foi possível recuperar o manifesto de integridade original."
+          # Clonamos o repositório-modelo OFICIAL (upstream) num diretório separado.
+          # Como o aluno não controla o upstream, os arquivos de validação de lá são
+          # a referência confiável. Comparamos os do repo do aluno com os oficiais.
+          OFICIAL="$(mktemp -d)"
+          if ! git clone --depth 1 "$UPSTREAM" "$OFICIAL" 2>/dev/null; then
+            echo "  ❌ Não foi possível clonar o repositório-modelo oficial ($UPSTREAM)."
+            echo "     A integridade não pôde ser confirmada."
             exit 1
           fi
 
-          # Roda o verificador ORIGINAL, mas usando o MANIFESTO ORIGINAL,
-          # contra os arquivos atuais do repositório do aluno.
-          # O script resolve caminhos a partir de RAIZ = pasta-pai do script;
-          # por isso passamos o manifesto original por variável de ambiente.
-          MANIFEST_OVERRIDE="$MANIFEST_ORIG" bash "$SCRIPT_ORIG" || exit 1
+          # Roda o verificador OFICIAL usando o MANIFESTO OFICIAL, mas apontando a
+          # RAIZ para o repositório do ALUNO (o checkout atual = $GITHUB_WORKSPACE).
+          MANIFEST_OVERRIDE="$OFICIAL/.integridade/manifest.sha256" \
+          RAIZ_OVERRIDE="$GITHUB_WORKSPACE" \
+            bash "$OFICIAL/.integridade/verificar-integridade.sh" || exit 1
 
   relatorio-kiro:
     name: Relatório Kiro (obrigatório)

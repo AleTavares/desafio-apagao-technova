@@ -1,0 +1,66 @@
+name: validar-entrega
+
+# Correção automática das ENTREGAS.
+# Dispara quando um aluno abre/atualiza um PR criando entregas/<RA>/entrega.md.
+# Lê a URL do repositório do aluno, clona e roda os verificadores OFICIAIS
+# (deste repo) contra o código dele.
+#
+# SEGURANÇA: usa 'pull_request' (não 'pull_request_target'), permissões mínimas
+# (contents: read) e NÃO expõe segredos. O código do aluno é executado apenas
+# pelos verificadores oficiais, com timeout.
+
+on:
+  pull_request:
+    paths:
+      - "entregas/**"
+  workflow_dispatch:
+    inputs:
+      repo:
+        description: "URL do repositório do aluno (validação manual)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  validar-entrega:
+    name: Validar entrega do aluno
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout deste repositório (oficial)
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Descobrir a URL do repositório do aluno
+        id: repo
+        run: |
+          set -uo pipefail
+          if [ -n "${{ github.event.inputs.repo }}" ]; then
+            URL="${{ github.event.inputs.repo }}"
+            echo "Origem: workflow_dispatch"
+          else
+            # Localiza o(s) entrega.md alterado(s) no PR e extrai a linha REPO:
+            FILES="$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD -- 'entregas/**/entrega.md' || true)"
+            if [ -z "$FILES" ]; then
+              # fallback: qualquer entrega.md sob entregas/
+              FILES="$(find entregas -name entrega.md 2>/dev/null | head -1)"
+            fi
+            FILE="$(echo "$FILES" | head -1)"
+            if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
+              echo "❌ Não encontrei entregas/<RA>/entrega.md no PR."
+              exit 1
+            fi
+            echo "Arquivo de entrega: $FILE"
+            URL="$(grep -E '^\s*REPO:\s*' "$FILE" | head -1 | sed -E 's/^\s*REPO:\s*//' | tr -d '[:space:]')"
+          fi
+          if [ -z "$URL" ]; then
+            echo "❌ Linha 'REPO:' não encontrada ou vazia no entrega.md."
+            exit 1
+          fi
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          echo "→ Repo do aluno: $URL"
+
+      - name: Rodar validação oficial contra o repo do aluno
+        run: bash scripts/validar-entrega.sh "${{ steps.repo.outputs.url }}"
