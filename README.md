@@ -12,7 +12,9 @@
 
 Não é competição por velocidade nem por "melhor solução" — é um **desafio de superação**: quem chegar ao fim, ganha. O desafio é **difícil de propósito**. Espera-se que você use tudo que aprendeu no bimestre **e** o Kiro como copiloto.
 
-**Prazo final:** **28/10** (PR aberto e CI verde até essa data).
+**Prazo final:** **28/10/2026** (PR aberto e CI verde até essa data).
+
+> ⚠️ **Ferramenta obrigatória: Kiro.** Este desafio deve ser resolvido usando o **Kiro** como IA copiloto. O uso de qualquer outra ferramenta de IA (ChatGPT, Claude, Copilot, Gemini, etc.) **desclassifica** a entrega. O `relatorio-kiro.md` deve comprovar o uso do Kiro.
 
 ---
 
@@ -32,8 +34,8 @@ A infraestrutura caiu em **8 camadas**. Cada camada consertada libera uma **flag
 
 ## 🎯 Como Funciona
 
-1. Crie o **seu repositório** a partir deste modelo:
-   - Clique em **"Use this template"** (recomendado) ou faça um **fork**
+1. Faça um **fork** deste repositório:
+   - Clique em **"Fork"** no canto superior direito
    - Nomeie como **`desafio-apagao-technova-SEU-RA`** e deixe-o **público**
 2. Clone o seu repositório e conserte **cada fase** (pastas `fase-1-git/` até `fase-8-aws-academy/`)
 3. Cada fase tem um `README.md` com o **incidente**, o **objetivo** e o **critério da flag**
@@ -82,16 +84,16 @@ A entrega segue o mesmo modelo dos Trabalhos de Fixação (TF): o **código fica
 
 ---
 
-## 🤖 Regra de Ouro: IA Obrigatória e Documentada
+## 🤖 Regra de Ouro: Kiro Obrigatório e Documentado
 
-O prêmio é o **mascote do Kiro** — então usar IA como copiloto **faz parte da avaliação**. Você **deve** preencher o **`relatorio-kiro.md`** demonstrando:
+O prêmio é o **mascote do Kiro** — e o **Kiro é a única ferramenta de IA permitida** neste desafio. Usar ChatGPT, Claude, Copilot, Gemini ou qualquer outra IA **desclassifica** a entrega. Você **deve** preencher o **`relatorio-kiro.md`** demonstrando:
 
-- **Como usou a IA** para diagnosticar e consertar cada fase
-- **Como validou** cada correção (não basta "a IA disse que era isso" — como você confirmou?)
+- **Como usou o Kiro** para diagnosticar e consertar cada fase
+- **Como validou** cada correção (não basta "o Kiro disse que era isso" — como você confirmou?)
 - **Como dividiu as specs/prompts** em pedaços pequenos para **evitar alucinação e sobrecarga** da IA
-- **O que a IA errou** e como você percebeu
+- **O que o Kiro errou** e como você percebeu
 
-> Um `relatorio-kiro.md` genérico, vago ou copiado invalida a conclusão do desafio, mesmo com o CI verde. A ideia é provar que **você pilotou a IA**, e não o contrário.
+> Um `relatorio-kiro.md` genérico, vago ou copiado invalida a conclusão do desafio, mesmo com o CI verde. A ideia é provar que **você pilotou o Kiro**, e não o contrário.
 
 ---
 
@@ -99,18 +101,19 @@ O prêmio é o **mascote do Kiro** — então usar IA como copiloto **faz parte 
 
 1. **Individual.** Cada aluno resolve o desafio no seu próprio repositório.
 2. **Todos que completarem ganham** — não é por velocidade.
-3. **IA permitida e obrigatória** (Kiro recomendado; pode combinar com outras LLMs, mas documente).
+3. **Kiro obrigatório e exclusivo.** O desafio deve ser resolvido com o **Kiro** como IA copiloto. Usar **qualquer outra** ferramenta de IA (ChatGPT, Claude, Copilot, Gemini, etc.) **desclassifica** a entrega.
 4. **É permitido** consultar documentação oficial e o material das aulas.
 5. **AWS Academy Learner Lab** para a Fase 8: use `LabRole`/`LabInstanceProfile`, região `us-east-1`, credenciais temporárias. **NÃO** crie IAM users/groups/roles. Rode `terraform destroy` após capturar a evidência.
 6. **Nunca** commite segredos reais, `.tfstate`, `.terraform/` ou `*.pem`.
-7. **Prazo:** 28/10.
+7. **Não altere a validação.** Os arquivos de validação — os `verificar.sh` de cada fase, o `scripts/verificar.sh` e o workflow `.github/workflows/validar-desafio.yml` — são **imutáveis**. O CI checa a integridade deles (job `integridade`) e **reprova o desafio** se qualquer um for modificado ou removido. Conserte o código das fases, nunca o "juiz".
+8. **Prazo:** 28/10/2026.
 
 ---
 
 ## 🚀 Como Começar
 
 ```bash
-# 1. Crie seu repositório a partir deste modelo ("Use this template" ou fork),
+# 1. Faça um fork deste repositório (botão "Fork"),
 #    nomeando como desafio-apagao-technova-SEU-RA (público). Depois:
 git clone https://github.com/SEU-USUARIO/desafio-apagao-technova-SEU-RA.git
 cd desafio-apagao-technova-SEU-RA
