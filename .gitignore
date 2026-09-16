@@ -1,0 +1,22 @@
+# Dependências
+node_modules/
+
+# Ambiente / segredos
+.env
+*.pem
+*.key
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
+crash.log
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

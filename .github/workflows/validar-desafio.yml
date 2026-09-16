@@ -1,0 +1,150 @@
+name: validar-desafio
+
+# O "juiz automático" da Operação TechNova.
+# Roda um job por fase. O gate final (desafio-completo) só passa quando
+# TODAS as fases passam E o relatorio-kiro.md está preenchido.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  fase-1-git:
+    name: Fase 1 — Git
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar Fase 1
+        run: bash fase-1-git/verificar.sh
+
+  fase-2-docker:
+    name: Fase 2 — Docker
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar Fase 2
+        run: bash fase-2-docker/verificar.sh
+
+  fase-3-compose:
+    name: Fase 3 — Docker Compose
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar Fase 3
+        run: bash fase-3-compose/verificar.sh
+
+  fase-4-terraform:
+    name: Fase 4 — Terraform / HCL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+      - name: Verificar Fase 4
+        run: bash fase-4-terraform/verificar.sh
+
+  fase-5-rede-seguranca:
+    name: Fase 5 — VPC / Rede / Segurança
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+      - name: Verificar Fase 5
+        run: bash fase-5-rede-seguranca/verificar.sh
+
+  fase-6-rds-state:
+    name: Fase 6 — RDS + Remote State
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+      - name: Verificar Fase 6
+        run: bash fase-6-rds-state/verificar.sh
+
+  fase-7-modulos:
+    name: Fase 7 — Módulos
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+      - name: Verificar Fase 7
+        run: bash fase-7-modulos/verificar.sh
+
+  fase-8-aws-academy:
+    name: Fase 8 — AWS Academy (evidência)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar Fase 8
+        run: bash fase-8-aws-academy/verificar.sh
+
+  relatorio-kiro:
+    name: Relatório Kiro (obrigatório)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verificar preenchimento do relatorio-kiro.md
+        run: |
+          echo "🔍 Verificando relatorio-kiro.md..."
+          ERROS=0
+          FILE="relatorio-kiro.md"
+          if [ ! -f "$FILE" ]; then
+            echo "  ❌ relatorio-kiro.md não encontrado"
+            exit 1
+          fi
+          # Não pode ter ficado com os placeholders "(sua resposta)"
+          PLACEHOLDERS=$(grep -c "_(sua resposta)_" "$FILE" || true)
+          if [ "$PLACEHOLDERS" -gt 0 ]; then
+            echo "  ❌ Ainda há $PLACEHOLDERS placeholders '(sua resposta)' não preenchidos"
+            ERROS=$((ERROS+1))
+          else
+            echo "  ✅ Sem placeholders pendentes"
+          fi
+          # Deve citar as 8 fases
+          for f in "Fase 1" "Fase 2" "Fase 3" "Fase 4" "Fase 5" "Fase 6" "Fase 7" "Fase 8"; do
+            if ! grep -q "$f" "$FILE"; then
+              echo "  ❌ Falta relatar a $f no relatório"
+              ERROS=$((ERROS+1))
+            fi
+          done
+          # Deve ter identificação (RA preenchido — heurística: linha RA com algo além do rótulo)
+          if grep -Eq '\*\*RA:\*\*\s*\S' "$FILE"; then
+            echo "  ✅ Identificação (RA) preenchida"
+          else
+            echo "  ❌ Preencha seu RA no relatório"
+            ERROS=$((ERROS+1))
+          fi
+          if [ "$ERROS" -eq 0 ]; then
+            echo "🎉 Relatório Kiro válido!"
+          else
+            echo "⚠️  Relatório Kiro incompleto ($ERROS problema(s))."
+            exit 1
+          fi
+
+  desafio-completo:
+    name: 🏆 DESAFIO COMPLETO
+    runs-on: ubuntu-latest
+    needs:
+      - fase-1-git
+      - fase-2-docker
+      - fase-3-compose
+      - fase-4-terraform
+      - fase-5-rede-seguranca
+      - fase-6-rds-state
+      - fase-7-modulos
+      - fase-8-aws-academy
+      - relatorio-kiro
+    steps:
+      - name: Parabéns
+        run: |
+          echo "🎉🎉🎉 TODAS AS 8 FASES + RELATÓRIO VALIDADOS! 🎉🎉🎉"
+          echo "A TechNova está DE PÉ novamente."
+          echo "Abra/atualize seu PR — o mascote do Kiro é seu! 🦖"

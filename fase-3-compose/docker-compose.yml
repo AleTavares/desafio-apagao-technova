@@ -1,0 +1,47 @@
+# ⚠️ DOCKER-COMPOSE QUEBRADO (Fase 3)
+# A stack não sobe saudável. Encontre e corrija os problemas para que a API
+# consiga conectar ao PostgreSQL e o endpoint /flag responda.
+#
+# Problemas propositais (encontre e corrija):
+#   1. A API e o PostgreSQL estão em REDES DIFERENTES (não conseguem se comunicar)
+#   2. Falta a variável de ambiente DB_PASSWORD no serviço "api"
+#   3. O DB_HOST da API aponta para um nome de serviço errado ("database" em vez de "postgres")
+#   4. O healthcheck do postgres usa um comando errado ("pg_ready" não existe; é "pg_isready")
+#   5. O depends_on da API não espera o banco ficar SAUDÁVEL (condition: service_healthy)
+
+services:
+  api:
+    build: ./app
+    container_name: fase3-api
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=database
+      - DB_PORT=5432
+      - DB_NAME=technova
+      - DB_USER=technova
+    depends_on:
+      - postgres
+    networks:
+      - frontend
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: fase3-db
+    environment:
+      - POSTGRES_DB=technova
+      - POSTGRES_USER=technova
+      - POSTGRES_PASSWORD=technova
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_ready -U technova"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
