@@ -31,8 +31,8 @@ else
   ERROS=$((ERROS+1))
 fi
 
-# 3. ID de recurso real (vpc-, subnet-, i-, sg-, etc.)
-if grep -Eq '(vpc|subnet|sg|i|rtb|igw)-[0-9a-f]{8,}' "$EV"; then
+# 3. ID de recurso real (prefixos AWS específicos: vpc-, subnet-, sg-, i-, rtb-, igw-, ...)
+if grep -Eq '\b(vpc|subnet|sg|rtb|igw|acl|eni|ami|vol|snap|i)-[0-9a-f]{8,}' "$EV"; then
   echo "  ✅ ID de recurso real criado presente"
 else
   echo "  ❌ Não encontrei um ID de recurso real (ex: vpc-0abc...)"
