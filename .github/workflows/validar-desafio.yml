@@ -7,6 +7,11 @@ name: validar-desafio
 on:
   push:
   pull_request:
+    # PRs de ENTREGA (só mexem em entregas/**) são validados pelo workflow
+    # 'validar-entrega'. Não faz sentido rodar as fases contra o próprio
+    # repo-modelo nesses PRs (as fases estão quebradas aqui de propósito).
+    paths-ignore:
+      - "entregas/**"
   workflow_dispatch:
 
 jobs:
