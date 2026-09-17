@@ -1,7 +1,9 @@
 # 🚨 Operação TechNova — A Madrugada do Apagão
 
 > **Desafio DevOps — Primeiro Bimestre (Módulos 1 e 2)**
+>
 > **Análise e Desenvolvimento de Sistemas — UniFAAT 2026.2**
+>
 > **Professor:** Alexandre da Costa Tavares Jr
 
 ---
@@ -37,11 +39,19 @@ A infraestrutura caiu em **8 camadas**. Cada camada consertada libera uma **flag
 1. Faça um **fork** deste repositório:
    - Clique em **"Fork"** no canto superior direito
    - Nomeie como **`desafio-apagao-technova-SEU-RA`** e deixe-o **público**
-2. Clone o seu repositório e conserte **cada fase** (pastas `fase-1-git/` até `fase-8-aws-academy/`)
-3. Cada fase tem um `README.md` com o **incidente**, o **objetivo** e o **critério da flag**
-4. A cada push, o **GitHub Actions** (o "juiz automático") valida suas correções na aba **Actions** do seu repositório
-5. Preencha o **`relatorio-kiro.md`** (obrigatório — sem ele o desafio não conta)
-6. Quando o CI do seu repositório ficar **100% verde** e o relatório estiver completo, **registre a entrega** (veja abaixo)
+2. **Habilite o GitHub Actions no seu fork** (passo obrigatório — veja o box abaixo)
+3. Clone o seu repositório e conserte **cada fase** (pastas `fase-1-git/` até `fase-8-aws-academy/`)
+4. Cada fase tem um `README.md` com o **incidente**, o **objetivo** e o **critério da flag**
+5. A cada push, o **GitHub Actions** (o "juiz automático") valida suas correções na aba **Actions** do seu repositório
+6. Preencha o **`relatorio-kiro.md`** (obrigatório — sem ele o desafio não conta)
+7. Quando o CI do seu repositório ficar **100% verde** e o relatório estiver completo, **registre a entrega** (veja abaixo)
+
+> ⚠️ **IMPORTANTE — habilite o Actions antes de tudo.** Em forks, o GitHub **desativa o Actions por padrão**. Se você não habilitar, seu CI **nunca roda** e nada é validado. Para ligar:
+> 1. No **seu fork**, abra a aba **Actions** (no topo do repositório).
+> 2. Clique no botão verde **"I understand my workflows, go ahead and enable them"**.
+> 3. Faça um commit/push (ou vá em Actions → workflow **validar-desafio** → **Run workflow**) para disparar a primeira execução.
+>
+> Se a aba Actions não mostrar execuções após um push, é quase sempre porque este passo foi pulado.
 
 > **Validação automática (no seu repo):** o arquivo `.github/workflows/validar-desafio.yml` roda um job por fase e um **gate final** que só passa quando todas as fases passam. Acompanhe na aba **Actions**.
 
@@ -62,7 +72,23 @@ A entrega segue o mesmo modelo dos Trabalhos de Fixação (TF): o **código fica
    [Desafio Apagão] RA: SEU-RA - Seu Nome
    ```
 
-> **Correção automática:** ao abrir o PR, o workflow **`validar-entrega`** deste repositório **clona o seu fork e roda os 8 verificadores oficiais + o relatório automaticamente**. Você vê o resultado nos checks do PR. Se ficar verde até **28/10/2026**, o mascote é seu. 🦖
+> **Correção automática:** ao abrir o PR, o workflow **`validar-entrega`** deste repositório **clona o seu fork e roda os 8 verificadores oficiais + o relatório automaticamente**. Você vê o resultado nos checks do PR. O CI verde é **obrigatório**, mas **não conclui** o desafio sozinho — veja a validação com o professor abaixo.
+
+---
+
+## 🎓 Validação com o Professor (Banca 1 a 1)
+
+> ⚠️ **CI verde não é o suficiente.** A conclusão do desafio só é confirmada após uma **validação individual (1 a 1) com o professor**.
+
+Depois que o CI do seu PR estiver verde, o professor vai conversar com você **individualmente** para **comprovar que foi você quem fez todo o processo** — e que você **entende** o que fez. Nessa conversa você deve:
+
+- **Explicar o diagnóstico e a correção de cada fase** com seus próprios termos (o que estava quebrado, por que, como consertou).
+- **Responder perguntas técnicas específicas** do professor sobre qualquer fase (ex: "por que expor a porta 5432 para `0.0.0.0/0` é perigoso?", "o que o `depends_on: condition: service_healthy` resolve?", "por que remover o segredo do arquivo não basta no mundo real?").
+- **Demonstrar o uso crítico do Kiro:** como dividiu os prompts, como validou as respostas e onde a IA errou (o `relatorio-kiro.md` é a base dessa conversa).
+
+**Se você não conseguir explicar ou responder às perguntas, a entrega não é validada** — mesmo com o CI 100% verde e o repositório perfeito. O objetivo do desafio é o **aprendizado**, não apenas o resultado. Quem apenas colou respostas da IA sem entender não passa na banca.
+
+> 💡 Faça o desafio de verdade, no seu ritmo, entendendo cada passo. A banca é fácil para quem realmente pilotou o Kiro — e impossível de fingir para quem não fez.
 
 ---
 
@@ -80,6 +106,7 @@ A entrega segue o mesmo modelo dos Trabalhos de Fixação (TF): o **código fica
 | 8 | `fase-8-aws-academy` | Execução real (Aulas 03-07) | Subir a infra de verdade no AWS Academy e provar |
 
 > **Fases 1 a 7:** validadas 100% no CI (build, `terraform validate/plan`, testes, scanners). Não precisam de conta AWS.
+>
 > **Fase 8:** exige **executar** a infra no **AWS Academy Learner Lab** e colar a **evidência assinada** no repo. O CI valida o formato da evidência.
 
 ---
@@ -118,21 +145,24 @@ O prêmio é o **mascote do Kiro** — e o **Kiro é a única ferramenta de IA p
 git clone https://github.com/SEU-USUARIO/desafio-apagao-technova-SEU-RA.git
 cd desafio-apagao-technova-SEU-RA
 
-# 2. Rode a verificação local para ver o estado inicial (tudo quebrado)
+# 2. HABILITE o GitHub Actions no seu fork (aba "Actions" -> botão verde de habilitar).
+#    Sem isso, o CI não roda. Passo obrigatório — veja o box em "Como Funciona".
+
+# 3. Rode a verificação local para ver o estado inicial (tudo quebrado)
 bash scripts/verificar.sh
 
-# 3. Ataque uma fase por vez. Comece pela fase-1-git/README.md
+# 4. Ataque uma fase por vez. Comece pela fase-1-git/README.md
 
-# 4. Sempre que quiser, rode de novo para ver o que já passou
+# 5. Sempre que quiser, rode de novo para ver o que já passou
 bash scripts/verificar.sh
 
-# 5. Faça commits pequenos e descritivos (Conventional Commits)
+# 6. Faça commits pequenos e descritivos (Conventional Commits)
 git add .
 git commit -m "fix(fase-1): remove segredo vazado do histórico"
 git push
 
-# 6. Acompanhe o CI na aba Actions do SEU repositório até ficar 100% verde.
-# 7. Registre a entrega com um PR NESTE repositório (seção "Como Entregar").
+# 7. Acompanhe o CI na aba Actions do SEU repositório até ficar 100% verde.
+# 8. Registre a entrega com um PR NESTE repositório (seção "Como Entregar").
 ```
 
 ---
@@ -146,8 +176,9 @@ Você concluiu o desafio quando:
 - [ ] O **`relatorio-kiro.md`** está preenchido e demonstra uso crítico da IA
 - [ ] Você abriu o **PR de entrega** com `entregas/SEU-RA/entrega.md` **neste repositório**
 - [ ] O workflow **`validar-entrega`** validou seu fork (checks verdes no PR)
+- [ ] Você foi **aprovado na validação 1 a 1 com o professor**, explicando o processo e respondendo às perguntas técnicas
 
-Cumpriu tudo até **28/10/2026**? **O mascote do Kiro é seu.** 🦖
+Cumpriu tudo até **28/10/2026** **e** passou na banca? **O mascote do Kiro é seu.** 🦖
 
 ---
 
