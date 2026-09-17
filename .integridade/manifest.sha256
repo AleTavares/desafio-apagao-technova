@@ -1,8 +1,8 @@
-]633;E;echo "# Manifesto de integridade — Operação TechNova";49034fcb-57c6-4f08-a5a9-6f7177d7d1f5]633;C# Manifesto de integridade — Operação TechNova
+# Manifesto de integridade — Operação TechNova
 # Gerado pelo professor. NÃO edite: o CI recalcula e compara.
 # Qualquer alteração nos arquivos de validação abaixo REPROVA o desafio.
 13affad56fcb3775a65eb4463eb370f206db013114c5c4bd5bcd367da6d9181a  fase-1-git/verificar.sh
-5f3c0bcb7c0ad2ce78cfcf92845ee7841a5d5fecfbd2ee6efadcdcbfff4a36ed  fase-2-docker/verificar.sh
+f3830c0a0e78c49e1d5cce99a584cad9f1757f3d81bcd934ad6cc07b1d957da1  fase-2-docker/verificar.sh
 95fafb725c9c41093d985e4c92f3579059448289a248af17e04518a2aad2e8bc  fase-3-compose/verificar.sh
 4c80a4906210250918b3a343844847dabaecbdd93a3fee6ff580ec86aaee090b  fase-4-terraform/verificar.sh
 ce0ce793c7cea10198473ae2ed453a4c9f8474be795dc638aa8a6f7ded3f69d8  fase-5-rede-seguranca/verificar.sh

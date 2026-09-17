@@ -38,16 +38,24 @@ else
   echo "  ✅ Imagem roda como usuário não-root ('$USR')"
 fi
 
-# 3. Sobe o container e testa /flag
+# 3. Sobe o container e testa /flag (com retry — não depende de sleep fixo)
 docker run -d -p 3000:3000 --name "$CID" "$IMG" >/dev/null 2>&1
-sleep 4
-RESP="$(curl -s http://localhost:3000/flag 2>/dev/null || true)"
+RESP=""
+FLAG_OK=0
+for i in $(seq 1 15); do
+  RESP="$(curl -s http://localhost:3000/flag 2>/dev/null || true)"
+  if echo "$RESP" | grep -q "FLAG{docker-image-buildada-e-non-root}"; then
+    FLAG_OK=1
+    break
+  fi
+  sleep 2
+done
 docker rm -f "$CID" >/dev/null 2>&1 || true
 
-if echo "$RESP" | grep -q "FLAG{docker-image-buildada-e-non-root}"; then
+if [ "$FLAG_OK" -eq 1 ]; then
   echo "  ✅ Endpoint /flag respondeu com a flag correta"
 else
-  echo "  ❌ /flag não retornou a flag esperada (resposta: '${RESP:-vazia}')"
+  echo "  ❌ /flag não retornou a flag esperada (última resposta: '${RESP:-vazia}')"
   ERROS=$((ERROS+1))
 fi
 
