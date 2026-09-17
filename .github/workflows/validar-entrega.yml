@@ -32,6 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           persist-credentials: false
+          fetch-depth: 0  # precisa do histórico para diff com a base do PR
 
       - name: Descobrir a URL do repositório do aluno
         id: repo
@@ -41,11 +42,14 @@ jobs:
             URL="${{ github.event.inputs.repo }}"
             echo "Origem: workflow_dispatch"
           else
-            # Localiza o(s) entrega.md alterado(s) no PR e extrai a linha REPO:
-            FILES="$(git diff --name-only "origin/${{ github.base_ref }}"...HEAD -- 'entregas/**/entrega.md' || true)"
+            # Garante que a branch base do PR está disponível para o diff.
+            BASE="${{ github.base_ref }}"
+            git fetch --no-tags --depth=1 origin "$BASE" 2>/dev/null || true
+            # Arquivos entrega.md alterados neste PR (base...HEAD).
+            FILES="$(git diff --name-only "origin/$BASE"...HEAD -- 'entregas/**/entrega.md' 2>/dev/null || true)"
             if [ -z "$FILES" ]; then
-              # fallback: qualquer entrega.md sob entregas/
-              FILES="$(find entregas -name entrega.md 2>/dev/null | head -1)"
+              # fallback: qualquer entrega.md novo sob entregas/ (exceto o _MODELO)
+              FILES="$(find entregas -name entrega.md ! -path '*/_MODELO/*' 2>/dev/null | head -1)"
             fi
             FILE="$(echo "$FILES" | head -1)"
             if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
