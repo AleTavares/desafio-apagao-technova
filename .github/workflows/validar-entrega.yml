@@ -34,6 +34,12 @@ jobs:
           persist-credentials: false
           fetch-depth: 0  # precisa do histórico para diff com a base do PR
 
+      - name: Instalar Terraform (fases 4-7 precisam)
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.0"
+          terraform_wrapper: false
+
       - name: Descobrir a URL do repositório do aluno
         id: repo
         run: |
