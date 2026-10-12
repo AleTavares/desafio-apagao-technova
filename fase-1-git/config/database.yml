@@ -8,4 +8,4 @@ development:
   port: 5432
   database: technova
   username: technova
-  password: SenhaSuperSecreta123
+  password: ${DB_PASSWORD}
