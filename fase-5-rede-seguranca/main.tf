@@ -50,7 +50,10 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "technova-public-rt" }
 
-  # ❌ FALTA a rota para a internet aqui (0.0.0.0/0 -> Internet Gateway)
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
 }
 
 resource "aws_route_table_association" "public" {
@@ -84,13 +87,13 @@ resource "aws_security_group" "rds" {
   name   = "technova-rds-sg"
   vpc_id = aws_vpc.main.id
 
-  # ❌ INSEGURO: banco exposto para a internet inteira!
+  # ✅ banco aceita conexões apenas do Security Group da API
   ingress {
-    description = "PostgreSQL"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "PostgreSQL"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.api.id]
   }
 
   egress {
