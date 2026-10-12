@@ -24,11 +24,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "technova-terraform-state"
-    key    = "fase6/terraform.tfstate"
-    region = "us-east-1"
-    # ❌ falta encrypt = true
-    # ❌ falta dynamodb_table = "..."
+    bucket         = "technova-terraform-state"
+    key            = "fase6/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "technova-terraform-locks"
   }
 }
 
@@ -57,13 +57,14 @@ resource "aws_db_instance" "technova" {
   username = "technova"
   password = var.db_password
 
-  # ❌ banco exposto para a internet
-  publicly_accessible = true
+  # ✅ banco não acessível publicamente
+  publicly_accessible = false
 
-  # ❌ armazenamento sem encriptação
-  storage_encrypted = false
+  # ✅ armazenamento encriptado
+  storage_encrypted = true
 
-  # ❌ falta db_subnet_group_name (banco deve ficar em subnets privadas)
+  # ✅ banco em subnets privadas
+  db_subnet_group_name = "technova-db-subnet-group"
 
   skip_final_snapshot = true
 
