@@ -22,14 +22,14 @@ terraform {
   }
 }
 
-# ---------- DUPLICAÇÃO (ruim) — ambiente DEV ----------
-resource "local_file" "dev" {
-  filename = "${path.module}/saida/dev.txt"
-  content  = "ambiente=dev"
+# ---------- MÓDULO reutilizável — ambiente DEV ----------
+module "dev" {
+  source = "./modules/ambiente"
+  nome   = "dev"
 }
 
-# ---------- DUPLICAÇÃO (ruim) — ambiente STAGING ----------
-resource "local_file" "staging" {
-  filename = "${path.module}/saida/staging.txt"
-  content  = "ambiente=staging"
+# ---------- MÓDULO reutilizável — ambiente STAGING ----------
+module "staging" {
+  source = "./modules/ambiente"
+  nome   = "staging"
 }
