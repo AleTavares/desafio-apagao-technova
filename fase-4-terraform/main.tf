@@ -9,11 +9,21 @@
 #   4. A interpolação usa sintaxe antiga/errada ("${var::ambiente}" com dois-pontos duplos)
 #   5. O output referencia um atributo inexistente do recurso
 
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    local = {
+      source  = "hashicorp/local"
+      version = "~> 2.0"
+    }
+  }
+}
+
 resource "local_file" "flag" {
   filename = "${path.module}/saida/flag.txt"
-  conteudo = "Ambiente: ${var::ambiente} - FLAG{terraform-hcl-valido-e-plan-limpo}"
+  content  = "Ambiente: ${var.ambiente} - FLAG{terraform-hcl-valido-e-plan-limpo}"
 }
 
 output "caminho_flag" {
-  value = local_file.flag.caminho_do_arquivo
+  value = local_file.flag.filename
 }
