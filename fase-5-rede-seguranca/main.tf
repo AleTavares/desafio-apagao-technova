@@ -1,16 +1,4 @@
-# ⚠️ REDE/SEGURANÇA QUEBRADA (Fase 5)
-# A infra de rede da TechNova está insegura e sem conectividade.
-# Corrija os problemas de Security Group e roteamento.
-#
-# Problemas propositais (encontre e corrija):
-#   1. O Security Group do BANCO (rds) expõe a porta 5432 para 0.0.0.0/0 (INTERNET INTEIRA!).
-#      Isso é uma falha grave de segurança. O banco só deve aceitar conexões do
-#      Security Group da API (use security_groups = [aws_security_group.api.id]).
-#   2. Falta a ROTA para a internet: a route table pública precisa de uma rota
-#      0.0.0.0/0 apontando para o Internet Gateway (aws_route com gateway_id).
-#
-# Observação: esta fase é validada por análise do código + terraform validate.
-# NÃO precisa aplicar na AWS aqui (a execução real é a Fase 8).
+# Fase 5 — VPC / Rede / Segurança (corrigido)
 
 terraform {
   required_version = ">= 1.0"
@@ -49,8 +37,13 @@ resource "aws_subnet" "public" {
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "technova-public-rt" }
+}
 
-  # ❌ FALTA a rota para a internet aqui (0.0.0.0/0 -> Internet Gateway)
+# ✅ Rota para a internet: 0.0.0.0/0 → Internet Gateway
+resource "aws_route" "internet" {
+  route_table_id         = aws_route_table.public.id
+  destination_cidr_block = "0.0.0.0/0"
+  gateway_id             = aws_internet_gateway.main.id
 }
 
 resource "aws_route_table_association" "public" {
@@ -84,13 +77,13 @@ resource "aws_security_group" "rds" {
   name   = "technova-rds-sg"
   vpc_id = aws_vpc.main.id
 
-  # ❌ INSEGURO: banco exposto para a internet inteira!
+  # ✅ Banco aceita conexões SOMENTE do Security Group da API (menor privilégio)
   ingress {
-    description = "PostgreSQL"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "PostgreSQL"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.api.id]
   }
 
   egress {
