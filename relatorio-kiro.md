@@ -57,10 +57,10 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### Fase 3 — Docker Compose
 
-- **Diagnóstico:**
-- **Como usei a IA:**
-- **A IA errou/alucinou?:**
-- **Como validei:** (ex. `docker compose up`, `curl /flag`, healthcheck)
+- **Diagnóstico:** O `docker-compose.yml` tinha 5 problemas que impediam a API de conectar ao PostgreSQL: (1) API e Postgres em redes diferentes (`frontend` vs `backend`), sem se enxergarem; (2) faltava a env `DB_PASSWORD` no serviço `api`; (3) `DB_HOST=database`, um nome de serviço inexistente (o correto é `postgres`); (4) healthcheck usava `pg_ready`, comando que não existe (o correto é `pg_isready`); (5) `depends_on` na forma curta, que não espera o banco ficar saudável.
+- **Como usei a IA:** Pedi para a IA ler o `README`, o `docker-compose.yml` (que lista os 5 problemas nos comentários) e o `server.js` para confirmar quais variáveis de ambiente a API realmente usa (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`) e que a rota `/flag` faz uma query real no banco. Tratei cada um dos 5 problemas como um item isolado antes de reescrever o arquivo.
+- **A IA errou/alucinou?:** Não alucinou. Uma decisão de projeto: em vez de só mover os dois serviços para uma das redes existentes, unifiquei em uma única rede `technova-net`, que é a forma mais limpa de resolver o problema 1. Também confirmei a dependência entre os itens 4 e 5: o `condition: service_healthy` só funciona se o healthcheck (item 4) estiver correto.
+- **Como validei:** Rodei `bash scripts/verificar.sh 3`, que sobe a stack de verdade com `docker compose up --build`. Resultado: `docker-compose.yml é válido`, `/flag respondeu com a flag correta (API conectada ao banco)` e `Fase 3 CONCLUÍDA!` (exit 0). A flag só aparece quando a query `SELECT 1` ao Postgres funciona, então o verde prova que a conexão está real.
 
 ### Fase 4 — Terraform / HCL
 
