@@ -1,6 +1,5 @@
-# Configuração de conexão com o banco de dados da TechNova
-# ⚠️ ESTE ARQUIVO ESTÁ QUEBRADO (Fase 1): contém uma senha hardcoded que vazou.
-# Sua tarefa: remover o segredo e usar uma variável de ambiente.
+﻿# Configuracao de conexao com o banco de dados da TechNova
+# Fase 1 CORRIGIDA: a senha deixou de ser hardcoded e agora vem de variavel de ambiente.
 
 development:
   adapter: postgresql
@@ -8,4 +7,4 @@ development:
   port: 5432
   database: technova
   username: technova
-  password: SenhaSuperSecreta123
+  password: ${DB_PASSWORD}

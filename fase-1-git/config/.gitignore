@@ -1,0 +1,5 @@
+﻿# Ignora arquivos sensiveis nesta pasta (Fase 1)
+# Evita que segredos sejam versionados por acidente.
+*.env
+*.pem
+secrets.*
