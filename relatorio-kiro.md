@@ -64,10 +64,10 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### Fase 4 — Terraform / HCL
 
-- **Diagnóstico:**
-- **Como usei a IA:**
-- **A IA errou/alucinou?:**
-- **Como validei:** (ex. `terraform validate`, `terraform plan`)
+- **Diagnóstico:** O `main.tf` + `variables.tf` tinham 5 erros de HCL: (1) faltava o bloco `terraform { required_providers { ... } }` declarando o provider `local`; (2) a variável `ambiente` era usada mas não estava declarada em `variables.tf`; (3) o recurso `local_file` usava o argumento `conteudo` em vez de `content`; (4) a interpolação estava como `${var::ambiente}` (dois-pontos duplos) em vez de `${var.ambiente}`; (5) o `output` referenciava o atributo inexistente `caminho_do_arquivo` em vez de `filename`.
+- **Como usei a IA:** Segui a abordagem que o próprio README sugere: usar a mensagem exata do `terraform validate` como spec. Pedi para a IA explicar o significado de cada erro (provider não declarado, variável ausente, argumento/atributo inválido) e corrigir uma linha por vez, confirmando que os nomes de argumento (`content`) e atributo (`filename`) são os que o provider `local` realmente expõe.
+- **A IA errou/alucinou?:** Não alucinou. Ponto de atenção: escrevi o HCL já alinhado (os `=` dos argumentos) para que o `terraform fmt -check` passasse sem precisar de um segundo passo; caso contrário bastaria rodar `terraform fmt`. Também fixei a versão do provider (`~> 2.4`) em vez de deixar sem restrição.
+- **Como validei:** Rodei `bash scripts/verificar.sh 4`. Passaram todas as etapas: `terraform init`, `terraform validate`, `fmt` (formatado), `terraform apply` e `Flag gerada em saida/flag.txt` — `Fase 4 CONCLUÍDA!` (exit 0). Esta fase usa o provider `local` (gera arquivo no disco), então roda sem nenhuma credencial AWS.
 
 ### Fase 5 — VPC / Rede / Segurança
 

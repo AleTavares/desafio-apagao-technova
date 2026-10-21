@@ -1,9 +1,8 @@
-# ⚠️ QUEBRADO (Fase 4)
-# A variável "ambiente" precisa ser DECLARADA aqui (o main.tf a utiliza).
-# Descomente e complete a declaração abaixo com type e default corretos.
+# Fase 4 CORRIGIDA — a variavel "ambiente" agora esta declarada.
+# O main.tf a utiliza em var.ambiente.
 
-# variable "ambiente" {
-#   description = "Nome do ambiente"
-#   type        = string
-#   default     = "desenvolvimento"
-# }
+variable "ambiente" {
+  description = "Nome do ambiente"
+  type        = string
+  default     = "desenvolvimento"
+}
