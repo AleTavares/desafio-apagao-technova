@@ -8,10 +8,10 @@
 
 ## Identificação
 
-- **Aluno:**
-- **RA:**
-- **Ferramenta(s) de IA utilizada(s):** (ex: Kiro / Kiro Spec / ChatGPT / Claude / Copilot)
-- **Data de conclusão:**
+- **Aluno:** Carina Dalpino
+- **RA:** 6325109
+- **Ferramenta(s) de IA utilizada(s):** Kiro
+- **Data de conclusão:** 21/10/2026
 
 ---
 
@@ -21,19 +21,19 @@
 
 > Explique sua estratégia de **quebrar o problema em pedaços pequenos**. Por que pedir "conserte o repositório inteiro" leva a erro, e como você evitou isso?
 
-_(sua resposta)_
+Ataquei UMA fase por vez e, dentro de cada fase, UM problema por vez. Pedir "conserte o repositório inteiro" leva a erro porque a IA tenta adivinhar o estado de dezenas de arquivos ao mesmo tempo, perde contexto e inventa soluções para problemas que não existem. Para evitar isso, o fluxo foi sempre: (1) ler o `README` e o `verificar.sh` da fase para descobrir os critérios EXATOS; (2) ler os arquivos quebrados; (3) corrigir item por item; (4) rodar o verificador; (5) só então passar para a próxima fase. Commitei fase a fase, o que manteve o histórico limpo e o contexto pequeno.
 
 ### A.2 Qual foi seu "tamanho ideal de spec/prompt"?
 
 > Descreva como você formulou os pedidos: uma fase por vez? Um erro por vez? Deu contexto (logs, arquivos) antes de pedir a correção? Dê 1 exemplo de prompt bom que você usou e por que ele funcionou.
 
-_(sua resposta)_
+O tamanho ideal foi "uma fase por vez", sempre dando o contexto (os arquivos e a saída do verificador) ANTES de pedir a correção. Em fases com assuntos distintos, separei ainda mais: na Fase 6 usei dois prompts, um só do RDS e outro só do backend S3, para a IA não misturar atributos de contextos diferentes. Exemplo de prompt bom: "Este `database.yml` tem uma senha hardcoded. Como removo o segredo e passo a usar variável de ambiente, e por quê?". Funcionou porque era específico, verificável (dá para conferir com `grep`) e pedia a explicação do porquê, não só o código pronto.
 
 ### A.3 Como você usou o CI/CD como bússola junto com a IA?
 
 > Explique como o resultado do pipeline guiou seus próximos prompts para a IA.
 
-_(sua resposta)_
+Usei o verificador local (`bash scripts/verificar.sh N`) como bússola a cada passo: cada checagem com ❌ virava o próximo item a corrigir, e cada ✅ confirmava que a correção funcionou de verdade (não só "a IA disse que era isso"). Depois de cada fase verde localmente, fazia commit e push, e acompanhava o workflow `validar-desafio` na aba Actions do meu fork. O pipeline foi o árbitro objetivo: só considerei uma fase concluída quando o verificador retornou exit 0.
 
 ---
 
@@ -92,10 +92,10 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### Fase 8 — AWS Academy (execução real)
 
-- **Diagnóstico / objetivo:**
-- **Como usei a IA (incluindo como instruiu a usar `LabRole`/`LabInstanceProfile`):**
-- **A IA errou/alucinou?:**
-- **Como validei:** (ex. `terraform output`, evidência assinada, API respondendo na nuvem)
+- **Diagnóstico / objetivo:** Única fase que exige execução real na AWS. O objetivo era subir uma infra mínima (uma VPC) no AWS Academy Learner Lab, capturar a evidência (Account ID, ARN, ID de recurso), destruir a infra e preencher o `evidencia.md`. O CI só valida o FORMATO da evidência (não tem acesso às credenciais).
+- **Como usei a IA (incluindo como instruiu a usar `LabRole`/`LabInstanceProfile`):** A IA preparou os arquivos Terraform da infra mínima (provider AWS em `us-east-1`, uma `aws_vpc` com output `vpc_id`) e o template do `evidencia.md`. Como a infra usada foi só uma VPC (que não exige instance profile), não precisei criar nem referenciar IAM — respeitando a regra do Lab de NÃO criar IAM users/groups/roles e usar apenas o que já existe (`LabRole`/`LabInstanceProfile`). A execução (`terraform apply`/`destroy`) foi feita por mim no meu terminal autenticado no Lab.
+- **A IA errou/alucinou?:** A lição central desta fase foi sobre SEGURANÇA, não sobre código: a IA se recusou corretamente a usar as credenciais temporárias que cheguei a colar no chat, alertou que deviam ser consideradas comprometidas (encerrar o Lab) e insistiu que ela só precisava dos valores PÚBLICOS (Account ID, ARN, vpc-id), nunca da secret key ou do session token. Também houve um erro meu de ambiente: o `aws sts get-caller-identity` falhou por um `~/.aws/credentials` mal formatado, mas o `terraform apply` funcionou e a saída do `destroy` já trouxe o Account ID (`688770970340`) e o ARN reais.
+- **Como validei:** O `terraform apply` criou a VPC `vpc-05746749b450790dc` de verdade na conta `688770970340`, e o `terraform destroy` retornou `Destroy complete! Resources: 1 destroyed.`. Preenchi o `evidencia.md` com esses valores reais e rodei `bash scripts/verificar.sh 8`: as 5 checagens passaram (Account ID de 12 dígitos, ARN, ID de recurso, destroy confirmado e flag) — `Fase 8 CONCLUÍDA!` (exit 0). Nenhuma credencial foi commitada (o próprio verificador reprova se encontrar secret/session token).
 
 ---
 
@@ -103,21 +103,21 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### C.1 Qual foi a pior alucinação da IA no desafio e como você a percebeu?
 
-_(sua resposta)_
+A IA não alucinou nas SOLUÇÕES, mas errou várias vezes na EXECUÇÃO de comandos: nas primeiras fases, tentou editar arquivos pelo terminal com `sed`/`python` e heredoc, e falhou por problemas de escape entre as camadas de shell (PowerShell -> WSL -> bash), chegando a corromper os acentos do `relatorio-kiro.md` uma vez. Percebi pelos erros `unterminated` e pelos caracteres estranhos no arquivo; a solução foi restaurar com `git checkout` e passar a escrever os arquivos via base64 preservando UTF-8. Lição: validar sempre o RESULTADO, não confiar que o comando "deve ter funcionado".
 
 ### C.2 Em qual fase a IA MAIS ajudou? E em qual você teve que assumir o controle e resolver "no braço"?
 
-_(sua resposta)_
+A IA mais ajudou na Fase 7 (módulos), gerando rapidamente a estrutura do módulo reutilizável e as chamadas no root. Onde tive que assumir o controle foi na Fase 8: quando cheguei a colar credenciais temporárias da AWS no chat, a IA se recusou a usá-las e explicou que eu mesma precisava executar o `terraform apply`/`destroy` no meu terminal autenticado no Lab — a parte prática da nuvem foi "no braço", só trouxe de volta os valores públicos (Account ID, ARN, vpc-id).
 
 ### C.3 O que você faria diferente na próxima vez que usar IA para DevOps?
 
-_(sua resposta)_
+Nunca colar credenciais em um chat — elas vão direto do painel para o `~/.aws/credentials` local. Também padronizaria desde o início um método de edição de arquivos que preserve UTF-8, em vez de descobrir isso depois de corromper um arquivo. E continuaria usando o verificador como bússola, mas rodaria o `git status` antes de cada commit para garantir que nenhum artefato (`.terraform`, `.tfstate`) ou arquivo de validação fosse incluído por engano.
 
 ### C.4 Você conseguiria ter validado as respostas da IA se NÃO tivesse feito as aulas 01 a 07?
 
 > Reflita sobre por que o conhecimento técnico é o que permite usar IA com segurança.
 
-_(sua resposta)_
+Não. Sem a base das aulas eu não saberia, por exemplo, por que `depends_on: condition: service_healthy` é diferente da forma curta, por que expor a 5432 para `0.0.0.0/0` é perigoso, ou por que `path.root` é diferente de `path.module` num módulo. O conhecimento técnico é o que permite JULGAR a resposta da IA: na Fase 6, uma resposta superficial (só adicionar `db_subnet_group_name`) teria quebrado o `terraform validate`, e só percebi isso porque entendo que o atributo precisa referenciar um recurso real. A IA acelera, mas quem valida é quem sabe.
 
 ---
 
