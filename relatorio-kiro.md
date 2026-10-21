@@ -71,10 +71,10 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### Fase 5 — VPC / Rede / Segurança
 
-- **Diagnóstico:**
-- **Como usei a IA:**
-- **A IA errou/alucinou?:**
-- **Como validei:** (ex. regra do SG, `plan`, checagem de exposição do banco)
+- **Diagnóstico:** O `main.tf` da rede tinha duas falhas graves: (1) o Security Group do RDS expunha a porta 5432 para `0.0.0.0/0`, ou seja, o banco estava aberto para a internet inteira; (2) a route table pública não tinha a rota `0.0.0.0/0 -> Internet Gateway`, então a subnet pública não tinha conectividade com a internet.
+- **Como usei a IA:** Pedi uma revisão de segurança direcionada (não genérica): por que `cidr_blocks = ["0.0.0.0/0"]` na 5432 é perigoso e como restringir o acesso apenas ao SG da aplicação. A IA explicou o conceito de menor privilégio em rede e indicou trocar `cidr_blocks` por `security_groups = [aws_security_group.api.id]`. Para a rota, confirmei a sintaxe do bloco `route` com `gateway_id` dentro da route table.
+- **A IA errou/alucinou?:** Não alucinou. Validei manualmente com `grep` que não sobrou nenhum `0.0.0.0/0` no ingress da 5432 do SG do RDS (o `egress` continua aberto de propósito, o que é normal: restringimos a entrada, não a saída). Mantive o `0.0.0.0/0` apenas onde faz sentido: no ingress da API (porta 3000, serviço público) e na rota de saída para a internet.
+- **Como validei:** Rodei `bash scripts/verificar.sh 5`. Resultado: `terraform validate` OK, `SG do RDS referencia o SG da API (menor privilégio)`, `Rota 0.0.0.0/0 -> Internet Gateway presente` e `Flag da Fase 5 encontrada` — `Fase 5 CONCLUÍDA!` (exit 0). Conceito aplicado: o banco só aceita conexões de quem está no SG da API; referenciar o grupo (e não um IP) é dinâmico e seguro, pois o IP da API pode mudar.
 
 ### Fase 6 — RDS + Remote State
 

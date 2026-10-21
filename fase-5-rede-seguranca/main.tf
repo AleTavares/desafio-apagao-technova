@@ -1,16 +1,11 @@
-# ⚠️ REDE/SEGURANÇA QUEBRADA (Fase 5)
-# A infra de rede da TechNova está insegura e sem conectividade.
-# Corrija os problemas de Security Group e roteamento.
+# Fase 5 CORRIGIDA — rede segura e com conectividade.
+# Correcoes aplicadas:
+#   1. SG do RDS: porta 5432 NAO aceita mais 0.0.0.0/0.
+#      Agora so aceita conexoes vindas do SG da API (menor privilegio).
+#   2. Adicionada a rota 0.0.0.0/0 -> Internet Gateway na route table publica.
 #
-# Problemas propositais (encontre e corrija):
-#   1. O Security Group do BANCO (rds) expõe a porta 5432 para 0.0.0.0/0 (INTERNET INTEIRA!).
-#      Isso é uma falha grave de segurança. O banco só deve aceitar conexões do
-#      Security Group da API (use security_groups = [aws_security_group.api.id]).
-#   2. Falta a ROTA para a internet: a route table pública precisa de uma rota
-#      0.0.0.0/0 apontando para o Internet Gateway (aws_route com gateway_id).
-#
-# Observação: esta fase é validada por análise do código + terraform validate.
-# NÃO precisa aplicar na AWS aqui (a execução real é a Fase 8).
+# Observacao: esta fase e validada por analise do codigo + terraform validate.
+# NAO precisa aplicar na AWS aqui (a execucao real e a Fase 8).
 
 terraform {
   required_version = ">= 1.0"
@@ -50,7 +45,11 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
   tags   = { Name = "technova-public-rt" }
 
-  # ❌ FALTA a rota para a internet aqui (0.0.0.0/0 -> Internet Gateway)
+  # (2) Rota para a internet: todo trafego externo sai pelo Internet Gateway.
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
 }
 
 resource "aws_route_table_association" "public" {
@@ -84,13 +83,14 @@ resource "aws_security_group" "rds" {
   name   = "technova-rds-sg"
   vpc_id = aws_vpc.main.id
 
-  # ❌ INSEGURO: banco exposto para a internet inteira!
+  # (1) SEGURO: o banco so aceita conexoes vindas do SG da API,
+  # nunca da internet aberta. Aplicacao do menor privilegio em rede.
   ingress {
-    description = "PostgreSQL"
-    from_port   = 5432
-    to_port     = 5432
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    description     = "PostgreSQL somente a partir do SG da API"
+    from_port       = 5432
+    to_port         = 5432
+    protocol        = "tcp"
+    security_groups = [aws_security_group.api.id]
   }
 
   egress {
