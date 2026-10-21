@@ -1,16 +1,7 @@
-# ⚠️ CÓDIGO DUPLICADO (Fase 7)
-# Este main.tf viola o princípio DRY: o mesmo bloco foi COPIADO E COLADO para
-# dois ambientes (dev e staging). Sua missão é REFATORAR isso em um MÓDULO
-# reutilizável e chamar o módulo duas vezes (uma por ambiente).
-#
-# Objetivo:
-#   1. Criar um módulo em ./modules/ambiente/ que gere um arquivo de saída
-#      contendo o nome do ambiente (recebido por variável).
-#   2. Substituir os dois recursos duplicados abaixo por DUAS chamadas de módulo
-#      (module "dev" e module "staging"), passando o nome do ambiente por variável.
-#   3. O root NÃO pode mais ter recursos "local_file" duplicados — deve usar o módulo.
-#
-# Esta fase usa o provider "local" (não precisa de AWS).
+# Fase 7 CORRIGIDA — princípio DRY aplicado.
+# Os dois recursos local_file duplicados (dev e staging) foram movidos para o
+# modulo reutilizavel em ./modules/ambiente/. Agora o root apenas CHAMA o modulo
+# duas vezes, passando o nome do ambiente por variavel.
 
 terraform {
   required_version = ">= 1.0"
@@ -22,14 +13,13 @@ terraform {
   }
 }
 
-# ---------- DUPLICAÇÃO (ruim) — ambiente DEV ----------
-resource "local_file" "dev" {
-  filename = "${path.module}/saida/dev.txt"
-  content  = "ambiente=dev"
+# Uma unica definicao de logica (o modulo), reutilizada por ambiente.
+module "dev" {
+  source = "./modules/ambiente"
+  nome   = "dev"
 }
 
-# ---------- DUPLICAÇÃO (ruim) — ambiente STAGING ----------
-resource "local_file" "staging" {
-  filename = "${path.module}/saida/staging.txt"
-  content  = "ambiente=staging"
+module "staging" {
+  source = "./modules/ambiente"
+  nome   = "staging"
 }

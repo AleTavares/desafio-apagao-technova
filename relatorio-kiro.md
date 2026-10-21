@@ -85,10 +85,10 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### Fase 7 — Módulos
 
-- **Diagnóstico:**
-- **Como usei a IA:**
-- **A IA errou/alucinou?:**
-- **Como validei:** (ex. `terraform validate` nos dois ambientes, composição correta)
+- **Diagnóstico:** O `main.tf` da raiz violava o princípio DRY: tinha dois recursos `local_file` praticamente idênticos (um para `dev`, outro para `staging`), copiados e colados, variando apenas o nome do ambiente. Isso torna a manutenção frágil — mudar a lógica exige alterar em vários lugares.
+- **Como usei a IA:** Pedi em etapas, como o README sugere: primeiro como transformar o recurso num módulo parametrizado por variável (estrutura de arquivos do módulo), depois como chamá-lo duas vezes no root com `nome = "dev"` e `nome = "staging"`. Criei `modules/ambiente/` com `variables.tf` (variável `nome`), `main.tf` (o `local_file` parametrizado) e `outputs.tf`.
+- **A IA errou/alucinou?:** O ponto mais sutil foi `path.module` vs `path.root`. Uma resposta ingênua usaria `path.module`, o que geraria os arquivos DENTRO da pasta do módulo — mas o `verificar.sh` procura por `saida/dev.txt` e `saida/staging.txt` na raiz da fase. Usei `path.root` de propósito para os arquivos saírem na pasta de quem chama o módulo. Também garanti que o módulo não tem nada hardcoded de "dev"/"staging" (tudo vem da variável), então é reutilizável de verdade e não um copia-e-cola disfarçado.
+- **Como validei:** Rodei `bash scripts/verificar.sh 7`. As 7 checagens passaram: módulo existe, root chama o módulo 2x, root sem `local_file` duplicado, `terraform init + apply`, `saida/dev.txt` e `saida/staging.txt` gerados com o conteúdo correto, e `Flag da Fase 7 encontrada` — `Fase 7 CONCLUÍDA!` (exit 0). Prova de reutilização: para adicionar um ambiente `prod`, bastaria mais uma chamada `module "prod" { nome = "prod" }`.
 
 ### Fase 8 — AWS Academy (execução real)
 
