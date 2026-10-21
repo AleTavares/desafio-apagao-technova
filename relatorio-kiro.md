@@ -78,10 +78,10 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### Fase 6 — RDS + Remote State
 
-- **Diagnóstico:**
-- **Como usei a IA:**
-- **A IA errou/alucinou?:**
-- **Como validei:** (ex. conexão ao banco, backend S3 + DynamoDB funcionando)
+- **Diagnóstico:** O `main.tf` tinha 5 problemas em dois assuntos distintos. Backend S3: (1) faltava `encrypt = true` e (2) faltava `dynamodb_table` para o state locking. RDS: (3) `publicly_accessible = true` (banco exposto), (4) `storage_encrypted = false` (sem encriptação) e (5) faltava `db_subnet_group_name` (banco deveria ficar em subnets privadas).
+- **Como usei a IA:** Segui a dica do README e separei em DOIS prompts distintos: um só sobre o RDS (quais atributos garantem banco não-público e armazenamento encriptado) e outro só sobre o backend S3 (por que `encrypt` e `dynamodb_table` importam). Dividir em dois pedidos menores deu respostas mais precisas e focadas do que pedir "conserta o RDS e o backend" de uma vez — misturar os dois temas num prompt só aumenta a chance de a IA confundir atributos de contextos diferentes.
+- **A IA errou/alucinou?:** Ponto importante que exigiu julgamento meu: o `verificar.sh` só exige que `db_subnet_group_name` exista, mas apontar para um subnet group inexistente faria o `terraform validate` falhar. Então não bastou adicionar a linha — criei os recursos de apoio (VPC + duas subnets privadas + `aws_db_subnet_group`) e referenciei o recurso real, para o atributo existir E o validate passar. Uma resposta superficial da IA (só adicionar a linha) teria quebrado o validate.
+- **Como validei:** Rodei `bash scripts/verificar.sh 6`. As 7 checagens passaram: `terraform validate`, `encrypt = true`, `dynamodb_table`, `publicly_accessible = false`, `storage_encrypted = true`, `db_subnet_group_name` e `Flag da Fase 6 encontrada` — `Fase 6 CONCLUÍDA!` (exit 0). O validate roda com `-backend=false` no CI, então não precisa do bucket real. Conceitos: encriptar o state protege segredos em repouso; o lock no DynamoDB evita que dois `apply` concorrentes corrompam o state.
 
 ### Fase 7 — Módulos
 

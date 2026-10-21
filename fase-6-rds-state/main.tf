@@ -1,17 +1,12 @@
-# ⚠️ RDS + REMOTE STATE QUEBRADOS (Fase 6)
-# A camada de dados e a proteção do state estão mal configuradas.
-# Corrija os problemas de RDS e do backend remoto.
-#
-# Problemas propositais (encontre e corrija):
-#   BACKEND (bloco terraform > backend "s3"):
-#     1. Falta "encrypt = true" (o state guarda segredos e precisa ser encriptado)
-#     2. Falta "dynamodb_table" para o state locking (prevenir conflitos)
-#   RDS (aws_db_instance):
-#     3. "publicly_accessible = true" — o banco NÃO pode ser público
-#     4. "storage_encrypted = false" — o armazenamento deve ser encriptado
-#     5. Falta "db_subnet_group_name" — o RDS deve ficar nas subnets privadas
-#
-# Esta fase é validada por terraform validate + análise do código (não aplica na AWS).
+# Fase 6 CORRIGIDA — RDS privado/encriptado e state protegido.
+# Correcoes aplicadas:
+#   BACKEND:
+#     1. encrypt = true (state encriptado em repouso)
+#     2. dynamodb_table para state locking (evita applies concorrentes)
+#   RDS:
+#     3. publicly_accessible = false (banco nao exposto a internet)
+#     4. storage_encrypted = true (armazenamento encriptado)
+#     5. db_subnet_group_name presente (banco em subnets privadas)
 
 terraform {
   required_version = ">= 1.0"
@@ -24,11 +19,11 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "technova-terraform-state"
-    key    = "fase6/terraform.tfstate"
-    region = "us-east-1"
-    # ❌ falta encrypt = true
-    # ❌ falta dynamodb_table = "..."
+    bucket         = "technova-terraform-state"
+    key            = "fase6/terraform.tfstate"
+    region         = "us-east-1"
+    encrypt        = true
+    dynamodb_table = "technova-terraform-locks"
   }
 }
 
@@ -46,6 +41,33 @@ variable "db_password" {
   default     = "TrocarEmProducao123"
 }
 
+# VPC e subnets privadas onde o banco vai viver (rede interna, sem acesso publico).
+resource "aws_vpc" "main" {
+  cidr_block = "10.0.0.0/16"
+  tags       = { Name = "technova-vpc" }
+}
+
+resource "aws_subnet" "private_a" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.11.0/24"
+  availability_zone = "us-east-1a"
+  tags              = { Name = "technova-private-a" }
+}
+
+resource "aws_subnet" "private_b" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.0.12.0/24"
+  availability_zone = "us-east-1b"
+  tags              = { Name = "technova-private-b" }
+}
+
+# Subnet group do RDS: agrupa as subnets privadas para o banco.
+resource "aws_db_subnet_group" "technova" {
+  name       = "technova-db-subnet-group"
+  subnet_ids = [aws_subnet.private_a.id, aws_subnet.private_b.id]
+  tags       = { Name = "technova-db-subnet-group" }
+}
+
 resource "aws_db_instance" "technova" {
   identifier        = "technova-db"
   engine            = "postgres"
@@ -57,13 +79,14 @@ resource "aws_db_instance" "technova" {
   username = "technova"
   password = var.db_password
 
-  # ❌ banco exposto para a internet
-  publicly_accessible = true
+  # (3) Banco NAO exposto a internet.
+  publicly_accessible = false
 
-  # ❌ armazenamento sem encriptação
-  storage_encrypted = false
+  # (4) Armazenamento encriptado em repouso.
+  storage_encrypted = true
 
-  # ❌ falta db_subnet_group_name (banco deve ficar em subnets privadas)
+  # (5) Banco nas subnets privadas via subnet group.
+  db_subnet_group_name = aws_db_subnet_group.technova.name
 
   skip_final_snapshot = true
 
