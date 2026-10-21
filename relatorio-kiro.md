@@ -43,17 +43,17 @@ Para **cada uma das 8 fases**, preencha o bloco abaixo. Seja específico: qual e
 
 ### Fase 1 — Git
 
-- **Diagnóstico (o que estava quebrado):**
-- **Como usei a IA (prompt/spec resumido):**
-- **A IA errou ou alucinou em algo? O quê?:**
-- **Como validei a correção:** (comando/evidência: ex. `git log`, scanner de segredo, CI verde)
+- **Diagnóstico (o que estava quebrado):** A pasta `config/` tinha 5 problemas apontados pelo `verificar.sh`: (1) a senha real `SenhaSuperSecreta123` estava hardcoded em `database.yml`; (2) o arquivo não usava variável de ambiente; (3) o `app.env` apontava para `APP_ENV=producao` em vez de `desenvolvimento`; (4) não existia `config/.gitignore` protegendo arquivos sensíveis; (5) faltava o `config/CORRIGIDO.md` com a flag.
+- **Como usei a IA (prompt/spec resumido):** Dividi o problema em pedaços pequenos, atacando um erro por vez em vez de pedir "conserte a fase 1". Primeiro pedi para a IA ler o README e o `verificar.sh` da fase para descobrir os critérios exatos; depois tratei cada checagem como tarefa isolada: trocar a senha por `${DB_PASSWORD}`, ajustar o `APP_ENV`, criar o `.gitignore` (ignorando `*.env`, `*.pem`, `secrets.*`) e criar o `CORRIGIDO.md` com a flag exata.
+- **A IA errou ou alucinou em algo? O quê?:** Não errou na solução, mas errou na execução: tentou editar os arquivos via terminal (`sed`/`python` com heredoc) e falhou várias vezes por problemas de escape entre as camadas de shell (PowerShell -> WSL -> bash). Percebi pelos erros `unterminated` retornados e pela corrupção de acentos num momento (precisei restaurar o arquivo com `git checkout`). A correção foi mudar de abordagem para uma edição mais controlada.
+- **Como validei a correção:** Rodei `bash scripts/verificar.sh 1`. As 5 checagens passaram (senha removida, usa variável de ambiente, `APP_ENV=desenvolvimento`, `.gitignore` ignora `*.env`, flag encontrada) e retornou `Fase 1 CONCLUÍDA!` (exit 0). Observação conceitual: num caso real, remover o segredo do arquivo não basta — ele continua no histórico do Git (exigiria `git filter-repo`) e a credencial precisaria ser rotacionada no banco.
 
 ### Fase 2 — Docker
 
-- **Diagnóstico:**
-- **Como usei a IA:**
-- **A IA errou/alucinou?:**
-- **Como validei:** (ex. `docker build`, `docker inspect` do usuário, tamanho da imagem)
+- **Diagnóstico:** O `app/Dockerfile` tinha 6 erros propositais: (1) `FROM node:latest` (tag flutuante); (2) `COPY . .` antes do `npm install`, matando o cache de layers; (3) `COPY package-lock.json` de um arquivo que não existe na pasta `app/`, o que quebrava o build; (4) rodava como root (sem `USER`); (5) faltava `EXPOSE 3000`; (6) `CMD` apontava para `app.js` em vez de `server.js`.
+- **Como usei a IA:** Primeiro pedi para a IA ler `package.json`, `server.js` e o `verificar.sh` para confirmar a dependência (express), a porta (3000) e o entrypoint (server.js), e os critérios de validação (build + non-root + `/flag`). Só depois reescrevi o Dockerfile atacando um problema por vez, em vez de aceitar uma reescrita às cegas.
+- **A IA errou/alucinou?:** Dessa vez acertou a solução de primeira. Um ponto de atenção que validei manualmente: como não existe `package-lock.json`, `npm ci` falharia (ele exige o lock), então usei `npm install --production` com `COPY package*.json ./` — o curinga resolve a ausência do lock sem criar arquivo à toa. Também confirmei que o `USER node` deve vir depois do `npm install` (o install precisa de permissão de escrita em `/app`).
+- **Como validei:** Rodei `bash scripts/verificar.sh 2`. As 3 checagens passaram: `Imagem buildou`, `Imagem roda como usuário não-root ('node')` e `Endpoint /flag respondeu com a flag correta` — `Fase 2 CONCLUÍDA!` (exit 0).
 
 ### Fase 3 — Docker Compose
 
